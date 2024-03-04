@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import CustomUser
-from .models import Customer_info
+from .models import Customer_info, Draw_date
 # Register your models here.
 
 @admin.register(Customer_info)
@@ -10,3 +10,5 @@ class CustomerAdmin(admin.ModelAdmin):
 
 
 admin.site.register(CustomUser)
+
+admin.site.register(Draw_date)
