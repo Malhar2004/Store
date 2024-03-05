@@ -81,9 +81,9 @@ WSGI_APPLICATION = 'StoreSite.wsgi.application'
 DATABASES = {
     'default': {
          'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Store', # database name
+        'NAME': 'Store1', # database name
         'USER': 'postgres',
-        'PASSWORD': 'Malhar2004',
+        'PASSWORD': 'kaushal',
         'HOST': 'localhost',    # to connect the postgres and django install module psycopg2
     }
 }

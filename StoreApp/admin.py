@@ -5,7 +5,7 @@ from .models import Customer_info, Draw_date
 
 @admin.register(Customer_info)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ("Name","Mobile_No","Invoice_no","Invoice_date","Amount","Token_id")
+    list_display = ("Name","Mobile_No","Invoice_no","Invoice_date","Amount","Token_id","dr_date")
 
 
 

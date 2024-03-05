@@ -91,7 +91,6 @@ class CustomerInfo(viewsets.ModelViewSet):
 def export_to_excel(request):
     # Retrieve data from the database via DRF view
     customer_data = Customer_info.objects.all()
-    draw_data = Draw_date.objects.all()
 
     # Create an Excel workbook
     wb = Workbook()
@@ -102,9 +101,9 @@ def export_to_excel(request):
     ws.append(headers)
 
     # Write data to Excel
-    for customer_row ,draw_row in zip(customer_data, draw_data):
+    for customer_row in customer_data:
         formated_invoice_date = customer_row.Invoice_date.strftime("%d-%m-%Y")
-        formated_draw_date = draw_row.dr_date.strftime("%d-%m-%Y")
+        formated_draw_date = customer_row.dr_date.strftime("%d-%m-%Y")
         ws.append([customer_row.Name, customer_row.Mobile_No, customer_row.Invoice_no,formated_invoice_date, customer_row.Amount, customer_row.Token_id,formated_draw_date])
 
     # Create a response containing the Excel file

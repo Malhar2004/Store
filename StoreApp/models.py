@@ -33,16 +33,23 @@ class Customer_info(models.Model):
     Invoice_date = models.DateField()
     Amount = models.PositiveIntegerField()
     Token_id = models.CharField(unique=True, editable=False)
+    dr_date = models.DateField(default=None)
 
 ############ Function #############################
     def save(self, *args, **kwargs):
         # Generate a unique 6-digit integer ID
         if not self.Token_id:
+            id_length = 6  # Initial length of the unique ID
             while True:
-                unique_id = random.randint(100000, 999999)
+                min_id = 10 ** (id_length - 1)
+                max_id = (10 ** id_length) - 1
+                unique_id = random.randint(min_id, max_id)
                 if not Customer_info.objects.filter(Token_id=unique_id).exists():
                     self.Token_id = unique_id
                     break
+            # Check if all possible IDs of this length are exhausted
+            if Customer_info.objects.count() == (max_id - min_id + 1):
+                id_length += 1  # Increase the length for the next iteration
 
         super(Customer_info, self).save(*args, **kwargs)
 
