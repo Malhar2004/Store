@@ -16,6 +16,7 @@ urlpatterns = [
     path('auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('user/', views.get_user_info, name='user_info'),
     path('exp/', views.export_to_excel, name= 'exp_excel'),
-    path('date/', include(router1.urls))
+    path('date/', include(router1.urls)),
+    path('delrecord/', views.deleted_record, name="deleted_record")
 ]
 

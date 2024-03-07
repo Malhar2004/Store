@@ -31,6 +31,7 @@ class Customer_info(models.Model):
             MaxLengthValidator(10)])
     Invoice_no = models.CharField(max_length=70, unique=True, validators=[validate_positive])
     Invoice_date = models.DateField()
+    time = models.TimeField(auto_now_add = True)
     Amount = models.PositiveIntegerField()
     Token_id = models.CharField(unique=True, editable=False)
     dr_date = models.DateField(default=None)
@@ -69,3 +70,23 @@ class Draw_date(models.Model):
 
     def __str__(self):
         return str(self.dr_date)
+
+
+
+class Deleted_records(models.Model):
+    Name = models.CharField(max_length=70,  validators=[RegexValidator(
+                regex='^[a-zA-Z\s]*$',
+                message='Name must contain only letters.',
+                code='invalid_name'
+            )
+        ])
+    Mobile_No = models.CharField(max_length=10, validators=[RegexValidator(r'^[0-9]+$'),MinLengthValidator(10),
+            MaxLengthValidator(10)])
+    Invoice_no = models.CharField(max_length=70, unique=True, validators=[validate_positive])
+    Invoice_date = models.DateField()
+    Amount = models.PositiveIntegerField()
+    Token_id = models.CharField(max_length=20, unique=True)
+    dr_date = models.DateField(default=None)
+    date = models.DateField(auto_now_add = True)
+    time = models.TimeField(auto_now_add = True)
+    IP_Address = models.GenericIPAddressField()

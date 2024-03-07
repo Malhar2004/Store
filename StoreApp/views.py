@@ -1,7 +1,7 @@
-from .models import Customer_info,CustomUser, Draw_date
+from .models import Customer_info,CustomUser, Draw_date, Deleted_records
 from django.http import JsonResponse
 from django.shortcuts import render, HttpResponse
-from .serializers import Customer_serializer, UserSerializer, Draw_date_serializer
+from .serializers import Customer_serializer, UserSerializer, Draw_date_serializer,deleted_record_serializer
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -118,3 +118,19 @@ class DrawDate(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Draw_date.objects.all()
     serializer_class = Draw_date_serializer
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def deleted_record(request):
+    if request.method == 'POST':
+        serializer = deleted_record_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == 'GET':
+        del_records = Deleted_records.objects.all()
+        serializer = deleted_record_serializer(del_records, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

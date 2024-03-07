@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Customer_info, CustomUser, Draw_date
+from .models import Customer_info, CustomUser, Draw_date, Deleted_records
 import re
 from django.core.exceptions import ValidationError
 
@@ -46,3 +46,8 @@ class Draw_date_serializer(serializers.ModelSerializer):
     #     if value < latest_invoice_date:
     #         raise serializers.ValidationError("Please change the draw date")
     #     return value
+        
+class deleted_record_serializer(serializers.ModelSerializer):
+     class Meta:
+        model = Deleted_records
+        fields = "__all__"
