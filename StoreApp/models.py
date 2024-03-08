@@ -32,7 +32,7 @@ class Customer_info(models.Model):
         ])
     Mobile_No = models.CharField(max_length=10, validators=[RegexValidator(r'^[0-9]+$'),MinLengthValidator(10),
             MaxLengthValidator(10)])
-    Invoice_no = models.CharField(max_length=70, validators=[validate_positive])
+    Invoice_no = models.CharField(max_length=70, unique=True, validators=[validate_positive])
     Invoice_date = models.DateField()
     time = models.CharField(max_length=5, editable=False)  # HH:MM format
     Amount = models.PositiveIntegerField()
