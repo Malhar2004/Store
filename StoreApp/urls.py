@@ -17,6 +17,7 @@ urlpatterns = [
     path('user/', views.get_user_info, name='user_info'),
     path('exp/', views.export_to_excel, name= 'exp_excel'),
     path('date/', include(router1.urls)),
-    path('delrecord/', views.deleted_record, name="deleted_record")
+    path('delrecord/<int:record_id>/', views.soft_delete_record, name="soft_delete_record"),
+    path('delrecord/', views.list_deleted_records, name="list_deleted_record")
 ]
 

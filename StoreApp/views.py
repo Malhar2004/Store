@@ -1,7 +1,7 @@
-from .models import Customer_info,CustomUser, Draw_date, Deleted_records
-from django.http import JsonResponse
+from .models import Customer_info,CustomUser, Draw_date
+from django.http import JsonResponse, HttpRequest
 from django.shortcuts import render, HttpResponse
-from .serializers import Customer_serializer, UserSerializer, Draw_date_serializer,deleted_record_serializer
+from .serializers import Customer_serializer, UserSerializer, Draw_date_serializer
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -18,6 +18,7 @@ from rest_framework.views import APIView
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def register_user(request):
     if request.method == 'POST':
         serializer = UserSerializer(data=request.data)
@@ -49,10 +50,6 @@ def user_login(request):
         if user:
             token, _ = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
-            # response = JsonResponse({'token': token.key})
-            # response.set_cookie(key='auth_token', value=token.key,
-            #                     httponly=True, path='/')  # Setting the token as an HTTP-only cookie
-            # return response
 
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -78,10 +75,10 @@ def get_user_info(request):
     }
     return Response(user_info)
 
-
+# return record which our not soft delete
 class CustomerInfo(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-    queryset = Customer_info.objects.all()
+    queryset = Customer_info.objects.filter(is_deleted=False) 
     serializer_class = Customer_serializer
 
 
@@ -120,17 +117,27 @@ class DrawDate(viewsets.ModelViewSet):
     serializer_class = Draw_date_serializer
 
 
-@api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
-def deleted_record(request):
-    if request.method == 'POST':
-        serializer = deleted_record_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    if request.method == 'GET':
-        del_records = Deleted_records.objects.all()
-        serializer = deleted_record_serializer(del_records, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def soft_delete_record(request, record_id):
+
+    if request.method == 'PUT':
+        record = Customer_info.objects.filter(pk=record_id).first()
+        if record:
+            serializer = Customer_serializer(instance=record, data={'is_deleted': True},partial=True, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'message': 'Record soft deleted successfully'}, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Record not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_deleted_records(request):
+    deleted_data = Customer_info.objects.filter(is_deleted=True)
+    serializer = Customer_serializer(deleted_data, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
