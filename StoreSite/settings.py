@@ -143,3 +143,10 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
+
+
+CORS_ALLOW_HEADERS = [
+    'x-forwarded-for',
+    # Add other headers you need to allow here
+]
+
