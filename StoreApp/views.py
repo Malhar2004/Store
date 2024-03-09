@@ -125,7 +125,9 @@ def soft_delete_record(request, record_id):
     if request.method == 'PUT':
         record = Customer_info.objects.filter(pk=record_id).first()
         if record:
-            serializer = Customer_serializer(instance=record, data={'is_deleted': True},partial=True, context={'request': request})
+             # Include both is_deleted and deleted_by_ip from the request data
+            data = {'is_deleted': True, 'deleted_by_ip': request.data.get('deleted_by_ip')}
+            serializer = Customer_serializer(instance=record, data=data, partial=True, context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response({'message': 'Record soft deleted successfully'}, status=status.HTTP_200_OK)

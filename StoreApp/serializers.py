@@ -61,7 +61,7 @@ class Customer_serializer(serializers.ModelSerializer):
         instance.is_deleted = validated_data.get('is_deleted', instance.is_deleted)
         # Update deleted_by_ip only if the instance is being soft-deleted
         if instance.is_deleted:
-            instance.deleted_by_ip = get_client_ip(self.context['request'])
+            instance.deleted_by_ip = validated_data.get('deleted_by_ip', instance.deleted_by_ip)
         
         instance.save()
         return instance
