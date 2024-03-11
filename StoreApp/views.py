@@ -12,7 +12,7 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
 from openpyxl import Workbook
 from rest_framework.views import APIView
-
+from datetime import datetime , timezone
 # Create your views here.
 
 
@@ -82,12 +82,50 @@ class CustomerInfo(viewsets.ModelViewSet):
     serializer_class = Customer_serializer
 
 
-
-
+#####################################################                          ###############################################
+##################################################### NON DELETED RECORD EXCEL ################################################
 @permission_classes([IsAuthenticated])
 def export_to_excel(request):
-    # Retrieve data from the database via DRF view
-    customer_data = Customer_info.objects.all()
+    # Retrieve date range from frontend
+    from_date_str = request.GET.get('from_date')
+    to_date_str = request.GET.get('to_date')
+
+    if from_date_str and to_date_str:
+    # Convert date strings to datetime objects
+        from_date = datetime.strptime(from_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        to_date = datetime.strptime(to_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+
+
+        from_date_formatted = from_date.strftime("%d-%m-%Y")
+        to_date_formatted = to_date.strftime("%d-%m-%Y")
+
+        customer_data = Customer_info.objects.filter(is_deleted=False, dr_date__range=[from_date, to_date])
+
+
+        wb = Workbook()
+        ws = wb.active
+
+        # Write headers
+        headers = ['Name', 'Mobile_No', 'Invoice_No', 'Invoice_Date','Amount', 'Coupon_id', 'draw_date']
+        ws.append(headers)
+
+        # Write data to Excel
+        for customer_row in customer_data:
+            formated_invoice_date = customer_row.Invoice_date.strftime("%d-%m-%Y")
+            formated_draw_date = customer_row.dr_date.strftime("%d-%m-%Y")
+            ws.append([customer_row.Name, customer_row.Mobile_No, customer_row.Invoice_no,formated_invoice_date, customer_row.Amount, customer_row.Token_id,formated_draw_date])
+
+        # Create a response containing the Excel file
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="Draw_date {from_date_formatted} - {to_date_formatted}.xlsx"'
+        wb.save(response)
+
+        return response
+    
+
+
+    # Retrieve all data from the database via DRF view
+    customer_data = Customer_info.objects.filter(is_deleted=False) 
 
     # Create an Excel workbook
     wb = Workbook()
@@ -105,10 +143,84 @@ def export_to_excel(request):
 
     # Create a response containing the Excel file
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="data.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="cutomers_data.xlsx"'
     wb.save(response)
 
     return response
+
+
+
+#################################################                      ###################################################
+################################################   DELTED RECORD EXCEL ###################################################
+@permission_classes([IsAuthenticated])
+def export_deleted_to_excel(request):
+
+    # Retrieve date range from frontend
+    from_date_str = request.GET.get('from_date')
+    to_date_str = request.GET.get('to_date')
+    
+
+    if from_date_str and to_date_str:
+    # Convert date strings to datetime objects
+        from_date = datetime.strptime(from_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        to_date = datetime.strptime(to_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+
+
+        from_date_formatted = from_date.strftime("%d-%m-%Y")
+        to_date_formatted = to_date.strftime("%d-%m-%Y")
+
+        customer_data = Customer_info.objects.filter(is_deleted=True, dr_date__range=[from_date, to_date])
+
+        # Create an Excel workbook
+        wb = Workbook()
+        ws = wb.active
+
+        # Write headers
+        headers = ['Name', 'Mobile_No', 'Invoice_No', 'Invoice_Date','Amount', 'Coupon_id', 'draw_date', 'IP_Address']
+        ws.append(headers)
+
+        # Write data to Excel
+        for customer_row in customer_data:
+            formated_invoice_date = customer_row.Invoice_date.strftime("%d-%m-%Y")
+            formated_draw_date = customer_row.dr_date.strftime("%d-%m-%Y")
+            ws.append([customer_row.Name, customer_row.Mobile_No, customer_row.Invoice_no,formated_invoice_date, customer_row.Amount, customer_row.Token_id,formated_draw_date,customer_row.deleted_by_ip])
+
+        # Create a response containing the Excel file
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="Deleted_data Draw_date {from_date_formatted} - {to_date_formatted}.xlsx"'
+        wb.save(response)
+
+        return response
+    
+
+
+
+    # Retrieve all data from the database via DRF view
+    customer_data = Customer_info.objects.filter(is_deleted=True) 
+
+    # Create an Excel workbook
+    wb = Workbook()
+    ws = wb.active
+
+    # Write headers
+    headers = ['Name', 'Mobile_No', 'Invoice_No', 'Invoice_Date','Amount', 'Coupon_id', 'draw_date','IP_Address']
+    ws.append(headers)
+
+    # Write data to Excel
+    for customer_row in customer_data:
+        formated_invoice_date = customer_row.Invoice_date.strftime("%d-%m-%Y")
+        formated_draw_date = customer_row.dr_date.strftime("%d-%m-%Y")
+        ws.append([customer_row.Name, customer_row.Mobile_No, customer_row.Invoice_no,formated_invoice_date, customer_row.Amount, customer_row.Token_id,formated_draw_date,customer_row.deleted_by_ip])
+
+    # Create a response containing the Excel file
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="deleted_data.xlsx"'
+    wb.save(response)
+
+    return response
+
+
+##################################################################################################################
 
 
 class DrawDate(viewsets.ModelViewSet):
