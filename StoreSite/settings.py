@@ -82,7 +82,7 @@ DATABASES = {
     'default': {
          'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Store', # database name
-        'USER': 'Malhar',   # postgres
+        'USER': 'malhar',   # postgres
         'PASSWORD': 'Malhar2004',
         'HOST': 'localhost',    # to connect the postgres and django install module psycopg2
     }
