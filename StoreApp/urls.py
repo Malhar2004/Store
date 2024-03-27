@@ -10,7 +10,7 @@ router1.register('drdate', views.DrawDate, basename="DrawDate")
 
 urlpatterns = [
     path('register/', views.register_user, name='register'),
-    path('api/login/', views.user_login, name='login'),
+    path('login/', views.user_login, name='login'),
     path('logout/',views.user_logout, name='logout'),
     path('', include(router.urls)),
     path('auth/', include('rest_framework.urls', namespace='rest_framework')),
